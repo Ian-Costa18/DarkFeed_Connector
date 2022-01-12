@@ -21,10 +21,16 @@ def get_feed(url: str, cookie: str=None) -> list:
     """
     # Check if cookie is set
     if cookie is None:
-        # If not, read the cookie from the cookie.txt file
+        # Check if the cookie.txt file exists
+        if not os.path.exists('cookie.txt'):
+            with open("cookie.txt", "w", encoding="utf-8") as cookie_file:
+                # Get the cookie and write it to the file
+                cookie_file.write(input("Enter cookie value: ").strip())
+        # If it does exist, read the cookie from the file
         with open("cookie.txt", "r", encoding="utf-8") as file:
             cookie = file.read()
     headers = {"Host": "darkfeed.io", "Cookie": cookie}
+
     return requests.get(url, headers=headers).json()
 
 
@@ -33,10 +39,21 @@ def scrape_feed():
     # Get the feed data
     feed = get_feed('https://darkfeed.io/wp-json/wp/v2/posts/')
 
-    # Check for new entries
-    with open("log.txt", 'r', encoding="utf-8") as file:
-        log = file.read()
-    new_entries = [post for post in feed if post["link"] not in log]
+    # Check if the log file exists
+    if not os.path.exists('log.txt'):
+        # If it doesn't, create it
+        open('log.txt', "x", encoding="utf-8").close()
+
+    # Check the log file for new entries
+    with open("log.txt", 'r', encoding="utf-8") as log_file:
+        log = log_file.read()
+
+    # Get the new entries
+    # Only include entries that are not in the log file
+    new_entries = [post
+                   for post in feed
+                   if post["link"] not in log
+                   ]
 
     if not new_entries:
         print("No new entries.\n")
@@ -61,21 +78,13 @@ def scrape_feed():
         print('-' * 30 + '\n')
 
         # Write the new entry to the log file
-        with open("log.txt", "a", encoding="utf-8") as file:
-            file.write(f'{link}\n')
+        with open("log.txt", "a", encoding="utf-8") as log_file:
+            log_file.write(f'{link}\n')
 
         time.sleep(1)
 
 
 if __name__ == '__main__':
-    # Set cookie
-    if not os.path.exists('cookie.txt'):
-        with open("cookie.txt", "w", encoding="utf-8") as cookie_file:
-            cookie_file.write(input("Enter cookie value: ").strip())
-
-    # Log file
-    if not os.path.exists('log.txt'):
-        open('log.txt', "x", encoding="utf-8").close()
 
     count = 1
     print()
