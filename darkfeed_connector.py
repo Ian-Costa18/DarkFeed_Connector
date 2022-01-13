@@ -9,15 +9,15 @@ from datetime import datetime
 import requests
 
 
-def get_feed(url: str, cookie: str=None) -> list:
+def get_feed(cookie: str=None, url: str='https://darkfeed.io/wp-json/wp/v2/posts/') -> list:
     """Get the feed and return a list of entries.
 
     Args:
-        url (str): URl of the feed.
         cookie (str, optional): Cookie to use for authentication. If None, use cookie.txt file. Defaults to None.
+        url (str, optional): URl of the feed. Defaults to 'https://darkfeed.io/wp-json/wp/v2/posts/'.
 
     Returns:
-        list: List of entries.
+        list: List of latest ransomware posts.
     """
     # Check if cookie is set
     if cookie is None:
@@ -37,7 +37,7 @@ def get_feed(url: str, cookie: str=None) -> list:
 def scrape_feed():
     """Scrape the feed and print a list of entries."""
     # Get the feed data
-    feed = get_feed('https://darkfeed.io/wp-json/wp/v2/posts/')
+    feed = get_feed()
 
     # Check if the log file exists
     if not os.path.exists('log.txt'):
@@ -69,10 +69,10 @@ def scrape_feed():
         victim = entry["excerpt"]["rendered"].replace("<p>", "").replace("</p>", "").strip()
 
         # Print the entry
-        print('New Victim\n' +
-             f'Group: {group}\n' +
-             f'Victim: {victim}\n' +
-             f'Date: {str(date)}\n' +
+        print('New Victim\n' \
+             f'Group: {group}\n' \
+             f'Victim: {victim}\n' \
+             f'Date: {str(date)}\n' \
              f'Link: {link}\n'
             )
         print('-' * 30 + '\n')
@@ -85,8 +85,6 @@ def scrape_feed():
 
 
 if __name__ == '__main__':
-
-    count = 1
     print()
     print("#" * 30)
     print("\n")
@@ -103,6 +101,7 @@ if __name__ == '__main__':
     print("#" * 30)
     print()
 
+    count = 1
     while True:
         scrape_feed()
         print(f'Number Of Runs: {count}')
